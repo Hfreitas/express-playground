@@ -1,20 +1,25 @@
 const express = require('express');
+// rotas de respostas da api
+const apiRouter = require('./routes/apiRouter');
+const signupRouter = require('./routes/signupRouter');
+// middlewares
+const errorMiddleware = require('./middlewares/errorMiddleware');
+const authMiddleware = require('./middlewares/authMiddleware');
 
 const app = express();
-const router = require('./router');
-
 const port = 8080;
 
 // Método express.json() acessa o body das requisições
 app.use(express.json());
 
-// Fazendo uso das rotas
-app.use('/simpsons', router);
+// Fazendo uso das rotas, aplicando middleware de autenticação.
+app.use('/simpsons', authMiddleware, apiRouter);
+app.use('/signup', signupRouter);
+app.use('*', (_req, res) =>
+  res.status(404).json({ message: 'invalid endpoint' }),
+);
 
-// eslint-disable-next-line no-unused-vars
-const errorMiddleware = (err, _req, res, _next) =>
-  res.status(500).send(`Oops! Mensagem: ${err.message}`);
-
+// Tratando erros de execução
 app.use(errorMiddleware);
 
 // eslint-disable-next-line no-console
